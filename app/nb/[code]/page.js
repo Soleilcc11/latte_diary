@@ -4,7 +4,21 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 
 const MAX_PHOTOS = 5;
+const MAX_NOTEBOOKS = 3;
+const NB_STORAGE_KEY = 'latte_notebooks';
 const EMOJIS = ['☕','🥛','🫘','🍵','🧋','🎨','📓','🌿','🍫','☀️','🌙','❤️','🔥','✨','🐻','🌸','🍰','🧁','🫖','📷'];
+
+function getSavedNotebooks() {
+  if (typeof window === 'undefined') return [];
+  try { return JSON.parse(localStorage.getItem(NB_STORAGE_KEY) || '[]'); } catch { return []; }
+}
+
+function saveNotebook(nb) {
+  const list = getSavedNotebooks().filter(n => n.code !== nb.code);
+  list.unshift(nb);
+  if (list.length > MAX_NOTEBOOKS) list.length = MAX_NOTEBOOKS;
+  localStorage.setItem(NB_STORAGE_KEY, JSON.stringify(list));
+}
 
 export default function NotebookPage() {
   const { code } = useParams();
@@ -36,6 +50,8 @@ export default function NotebookPage() {
   const [nbModal, setNbModal] = useState(false);
   const [nbEditName, setNbEditName] = useState('');
   const [nbEditEmoji, setNbEditEmoji] = useState('☕');
+
+  const [savedNbs, setSavedNbs] = useState([]);
 
   const fileInputRef = useRef(null);
 
@@ -82,6 +98,13 @@ export default function NotebookPage() {
   }, [code]);
 
   useEffect(() => { loadNotebook(); }, [loadNotebook]);
+
+  useEffect(() => {
+    if (notebook) {
+      saveNotebook({ code, name: notebook.name, emoji: notebook.emoji });
+      setSavedNbs(getSavedNotebooks());
+    }
+  }, [notebook, code]);
 
   async function handlePasswordSubmit() {
     setPasswordError('');
@@ -273,6 +296,8 @@ export default function NotebookPage() {
       body: JSON.stringify({ name: nbEditName.trim(), emoji: nbEditEmoji }),
     });
     setNotebook(prev => ({ ...prev, name: nbEditName.trim(), emoji: nbEditEmoji }));
+    saveNotebook({ code, name: nbEditName.trim(), emoji: nbEditEmoji });
+    setSavedNbs(getSavedNotebooks());
     setNbModal(false);
     toast('已更新');
   }
@@ -403,10 +428,20 @@ export default function NotebookPage() {
 
       {/* Notebook settings */}
       <div className="notebook-bar">
-        <button className="nb-chip active" onClick={openNbModal}>
-          <span className="nb-emoji">{notebook.emoji}</span>{notebook.name}<span className="nb-edit-icon">✎</span>
-        </button>
-        <a href="/" className="nb-chip" style={{ textDecoration: 'none' }}>+ 其他笔记本</a>
+        {savedNbs.map(nb => (
+          nb.code === code ? (
+            <button key={nb.code} className="nb-chip active" onClick={openNbModal}>
+              <span className="nb-emoji">{nb.emoji}</span>{nb.name}<span className="nb-edit-icon">✎</span>
+            </button>
+          ) : (
+            <a key={nb.code} href={`/nb/${nb.code}`} className="nb-chip" style={{ textDecoration: 'none' }}>
+              <span className="nb-emoji">{nb.emoji}</span>{nb.name}
+            </a>
+          )
+        ))}
+        {savedNbs.length < MAX_NOTEBOOKS && (
+          <a href="/" className="nb-chip" style={{ textDecoration: 'none' }}>+ 其他笔记本</a>
+        )}
       </div>
 
       {/* Tabs */}

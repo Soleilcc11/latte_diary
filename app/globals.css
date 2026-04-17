@@ -384,6 +384,65 @@ header p { font-size: 0.95rem; opacity: 0.8; margin-top: 0.4rem; position: relat
 .emoji-opt:hover { border-color: var(--caramel); background: var(--latte); }
 .emoji-opt.sel { border-color: var(--caramel); background: var(--caramel); transform: scale(1.1); }
 
+/* ── Saved Notebooks List ── */
+.saved-notebooks {
+  margin-bottom: 1.2rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--light-caramel);
+}
+.saved-notebooks h3 {
+  font-size: 0.9rem;
+  color: var(--soft-brown);
+  margin-bottom: 0.6rem;
+  font-weight: 600;
+}
+.saved-nb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--foam);
+}
+.saved-nb-item:last-child { border-bottom: none; }
+.saved-nb-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--espresso);
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.saved-nb-link:hover { background: var(--foam); }
+.saved-nb-emoji { font-size: 1.2rem; }
+.saved-nb-name { font-weight: 600; font-size: 0.95rem; }
+.saved-nb-code {
+  font-size: 0.75rem;
+  color: var(--soft-brown);
+  background: var(--latte);
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  letter-spacing: 1px;
+  margin-left: auto;
+}
+.saved-nb-remove {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--soft-brown);
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.saved-nb-remove:hover { background: #fdf0f0; color: #a94442; }
+
 .btn-primary {
   width: 100%; padding: 0.85rem;
   background: linear-gradient(135deg, var(--caramel), var(--accent));
@@ -392,7 +451,7 @@ header p { font-size: 0.95rem; opacity: 0.8; margin-top: 0.4rem; position: relat
   cursor: pointer; transition: all 0.3s; margin-bottom: 0.6rem;
 }
 .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,133,82,0.35); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .btn-secondary {
   width: 100%; padding: 0.85rem;
   background: var(--foam); color: var(--soft-brown); border: 1.5px solid var(--light-caramel);

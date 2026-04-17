@@ -2,7 +2,7 @@
 
 云端版拉花日记本，支持多人共享笔记本，密码保护访问。
 
-## 部署指南（约 10 分钟）
+## 部署指南
 
 ### 第一步：创建 Supabase 项目
 
@@ -33,9 +33,9 @@
 
 1. 点击左侧 **Project Settings** → **API**
 2. 记下以下信息：
-   - **Project URL**：形如 `https://xxxxx.supabase.co`
-   - **anon / public key**：`eyJhbGciOi...` 开头的长字符串
-   - **service_role key**：另一个 `eyJhbGciOi...` 开头的字符串（注意保密）
+  - **Project URL**：形如 `https://xxxxx.supabase.co`
+  - **anon / public key**：`eyJhbGciOi...` 开头的长字符串
+  - **service_role key**：另一个 `eyJhbGciOi...` 开头的字符串（注意保密）
 
 ### 第五步：部署到 Vercel
 
@@ -44,11 +44,11 @@
 3. 导入你的 GitHub 仓库
 4. 在 **Environment Variables** 中添加 3 个变量：
 
-   | 变量名 | 值 |
-   |---|---|
-   | `NEXT_PUBLIC_SUPABASE_URL` | 你的 Project URL |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key |
-   | `SUPABASE_SERVICE_ROLE_KEY` | service_role key |
+  | 变量名                             | 值                |
+  | ------------------------------- | ---------------- |
+  | `NEXT_PUBLIC_SUPABASE_URL`      | 你的 Project URL   |
+  | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key         |
+  | `SUPABASE_SERVICE_ROLE_KEY`     | service_role key |
 
 5. 点击 **Deploy**，等待部署完成
 6. 完成！访问 Vercel 给你的域名即可使用
@@ -90,3 +90,4 @@ cloud/
 ├── supabase-schema.sql    # 数据库建表脚本
 └── package.json
 ```
+

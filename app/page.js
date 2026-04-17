@@ -1,9 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const EMOJIS = ['☕','🥛','🫘','🍵','🧋','🎨','📓','🌿','🍫','☀️','🌙','❤️','🔥','✨','🐻','🌸','🍰','🧁','🫖','📷'];
+const MAX_NOTEBOOKS = 3;
+const NB_STORAGE_KEY = 'latte_notebooks';
+
+function getSavedNotebooks() {
+  if (typeof window === 'undefined') return [];
+  try { return JSON.parse(localStorage.getItem(NB_STORAGE_KEY) || '[]'); } catch { return []; }
+}
+
+function saveNotebook(nb) {
+  const list = getSavedNotebooks().filter(n => n.code !== nb.code);
+  list.unshift(nb);
+  if (list.length > MAX_NOTEBOOKS) list.length = MAX_NOTEBOOKS;
+  localStorage.setItem(NB_STORAGE_KEY, JSON.stringify(list));
+}
+
+function removeNotebook(code) {
+  const list = getSavedNotebooks().filter(n => n.code !== code);
+  localStorage.setItem(NB_STORAGE_KEY, JSON.stringify(list));
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -14,9 +33,16 @@ export default function HomePage() {
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [savedNbs, setSavedNbs] = useState([]);
+
+  useEffect(() => { setSavedNbs(getSavedNotebooks()); }, []);
 
   async function handleCreate() {
     if (!name.trim()) { setError('请输入笔记本名称'); return; }
+    if (getSavedNotebooks().length >= MAX_NOTEBOOKS) {
+      setError(`最多保留 ${MAX_NOTEBOOKS} 个笔记本，请先删除旧的`);
+      return;
+    }
     setLoading(true); setError('');
     try {
       const res = await fetch('/api/notebooks', {
@@ -27,7 +53,6 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      // If has password, verify to set cookie
       if (password) {
         await fetch(`/api/notebooks/${data.notebook.share_code}/verify`, {
           method: 'POST',
@@ -36,6 +61,7 @@ export default function HomePage() {
         });
       }
 
+      saveNotebook({ code: data.notebook.share_code, name: name.trim(), emoji });
       router.push(`/nb/${data.notebook.share_code}`);
     } catch (err) {
       setError(err.message);
@@ -47,7 +73,16 @@ export default function HomePage() {
   function handleJoin() {
     const code = joinCode.trim().toLowerCase();
     if (!code) { setError('请输入分享码'); return; }
+    if (getSavedNotebooks().length >= MAX_NOTEBOOKS && !getSavedNotebooks().some(n => n.code === code)) {
+      setError(`最多保留 ${MAX_NOTEBOOKS} 个笔记本，请先删除旧的`);
+      return;
+    }
     router.push(`/nb/${code}`);
+  }
+
+  function handleRemoveNb(code) {
+    removeNotebook(code);
+    setSavedNbs(getSavedNotebooks());
   }
 
   return (
@@ -62,8 +97,26 @@ export default function HomePage() {
           <div className="landing-card">
             <h2>开始记录你的咖啡旅程</h2>
             <p className="landing-desc">创建一个云端笔记本，随时记录、随处访问，还能与朋友共享。</p>
-            <button className="btn-primary" onClick={() => setMode('create')}>
-              ✨ 创建新笔记本
+
+            {savedNbs.length > 0 && (
+              <div className="saved-notebooks">
+                <h3>我的笔记本 ({savedNbs.length}/{MAX_NOTEBOOKS})</h3>
+                {savedNbs.map(nb => (
+                  <div key={nb.code} className="saved-nb-item">
+                    <a href={`/nb/${nb.code}`} className="saved-nb-link">
+                      <span className="saved-nb-emoji">{nb.emoji}</span>
+                      <span className="saved-nb-name">{nb.name}</span>
+                      <span className="saved-nb-code">{nb.code}</span>
+                    </a>
+                    <button className="saved-nb-remove" onClick={() => handleRemoveNb(nb.code)} title="移除">✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button className="btn-primary" onClick={() => setMode('create')}
+              disabled={savedNbs.length >= MAX_NOTEBOOKS}>
+              {savedNbs.length >= MAX_NOTEBOOKS ? `已达上限 (${MAX_NOTEBOOKS}个)` : '✨ 创建新笔记本'}
             </button>
             <button className="btn-secondary" onClick={() => setMode('join')}>
               🔗 输入分享码加入
